@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 	"vexora-studio/internal/database"
 	"vexora-studio/internal/llm"
 )
@@ -27,6 +28,8 @@ func HandleRecurate(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("🔄 Recurating entry %d for project %s...", id, entry.ProjectName)
 
+	startTime := time.Now()
+
 	// 2. Call LLM Again
 	journal, err := llm.MessageLlama(entry.ProjectName, entry.RawNotes)
 	if err != nil {
@@ -34,6 +37,9 @@ func HandleRecurate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "AI Processing Failed", 500)
 		return
 	}
+
+	duration := time.Since(startTime)
+	log.Printf("⏱️ Recuration took %v", duration)
 
 	// Flatten tags slice to string
 	tagsStr := strings.Join(journal.Tags, ",")
@@ -44,7 +50,10 @@ func HandleRecurate(w http.ResponseWriter, r *http.Request) {
 		journal.Summary,
 		journal.PolishedNote,
 		journal.TwitterDraft,
+		journal.LinkedinDraft,
+		journal.InstagramCaption,
 		tagsStr,
+		duration.String(),
 	)
 
 	if err != nil {
@@ -54,7 +63,7 @@ func HandleRecurate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("✅ Entry %d Recurated Successfully", id)
-	
+
 	// Redirect back to where they came from (or home)
 	referer := r.Header.Get("Referer")
 	if referer == "" {
@@ -81,6 +90,8 @@ func HandleFork(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("🔀 Forking entry %d for project %s...", id, entry.ProjectName)
 
+	startTime := time.Now()
+
 	// 2. Call LLM Again (Generate new version)
 	journal, err := llm.MessageLlama(entry.ProjectName, entry.RawNotes)
 	if err != nil {
@@ -88,6 +99,9 @@ func HandleFork(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "AI Processing Failed", 500)
 		return
 	}
+
+	duration := time.Since(startTime)
+	log.Printf("⏱️ Forking took %v", duration)
 
 	// Flatten tags slice to string
 	tagsStr := strings.Join(journal.Tags, ",")
@@ -99,7 +113,10 @@ func HandleFork(w http.ResponseWriter, r *http.Request) {
 		journal.Summary,
 		journal.PolishedNote,
 		journal.TwitterDraft,
+		journal.LinkedinDraft,
+		journal.InstagramCaption,
 		tagsStr,
+		duration.String(),
 	)
 
 	if err != nil {

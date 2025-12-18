@@ -12,7 +12,7 @@ import (
 const (
 	// CONFIG: Local Llama (Ollama)
 	OllamaURL = "http://localhost:11434/v1/chat/completions"
-	Model     = "llama3.2"
+	Model     = "gemma3"
 )
 
 // --- DATA STRUCTURES ---
@@ -38,32 +38,44 @@ type OpenAIResponse struct {
 }
 
 type JournalResponse struct {
-	Summary      string   `json:"summary"`
-	PolishedNote string   `json:"polished_note"`
-	TwitterDraft string   `json:"twitter_draft"`
-	Tags         []string `json:"tags"`
+	Summary          string   `json:"summary"`
+	PolishedNote     string   `json:"polished_note"`
+	TwitterDraft     string   `json:"twitter_draft"`
+	LinkedinDraft    string   `json:"linkedin_draft"`
+	InstagramCaption string   `json:"instagram_caption"`
+	Tags             []string `json:"tags"`
 }
 
 // --- PUBLIC API ---
 
 func MessageLlama(projectName, diff string) (*JournalResponse, error) {
 	// NEW PROMPT: The "Editor" Persona
+
 	systemPrompt := `
 # Role
-You are Vexora, an expert Tech Editor.
+You are Vexora, an expert Tech Editor and Developer Brand Manager.
 
 # Task
-The user will provide rough notes or a Copilot-generated summary from a coding session.
-Your job is to rewrite this into a polished, engaging Developer Log or Social Media update.
+Rewrite the user's rough coding notes into polished content for multiple platforms.
 
-# Tone
-Professional but authentic. Fix grammar, improve flow, and make it sound like a passionate engineer.
+# Content Guidelines
+1. **Polished Note:** A clean, grammar-perfect version of the log for the internal archive.
+2. **Twitter/X:** Short, punchy, "building in public" energy. Under 280 chars. 
+   - *Requirement:* MUST end with: "\n\nCreated with Vexora Studio @codershubinc"
+3. **LinkedIn:** Professional, "Engineering Thought Leadership" tone. 
+   - Structure: Problem -> Solution -> Impact.
+   - Use bullet points if listing features.
+4. **Instagram:** Casual "Behind the Scenes" vibe.
+   - Assume the image will be a screenshot of code or the terminal.
+   - Use a hook like "Late night coding session..." or "Finally cracked this bug...".
 
 # Output Format (JSON Only)
 {
   "summary": "Clean 1-sentence summary",
-  "polished_note": "The corrected, better version of the user's notes.",
-  "twitter_draft": "A short, engaging tweet based on the note. ALWAYS end with: \n\nCreated with Vexora Studio @codershubinc",
+  "polished_note": "The corrected internal log version.",
+  "twitter_draft": "The tweet content.",
+  "linkedin_draft": "The professional post content.",
+  "instagram_caption": "The IG caption content.",
   "tags": ["#tag1", "#tag2"]
 }
 `
