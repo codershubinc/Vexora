@@ -53,7 +53,10 @@
                 <h1 class="text-xl font-bold tracking-tight">Vexora Studio <span
                         class="text-slate-500 font-normal text-sm ml-2">Archivist</span></h1>
             </div>
-            <a href="/" class="text-sm font-medium text-slate-400 hover:text-white transition-colors">Refresh</a>
+            <nav class="flex gap-4 text-sm font-medium">
+                <a href="/" class="text-white transition-colors">Home</a>
+                <a href="/misc" class="text-slate-400 hover:text-white transition-colors">Miscellaneous</a>
+            </nav>
         </div>
     </header>
 
@@ -88,9 +91,10 @@
                     <div class="flex items-center gap-3">
                         <a href="/project/{{.ProjectName}}"
                             class="bg-indigo-500/10 text-indigo-400 text-xs font-mono px-2 py-1 rounded border border-indigo-500/20 hover:bg-indigo-500/20 transition-colors">{{.ProjectName}}</a>
-                        <span class="text-slate-400 text-sm">{{.CreatedAt}}</span>
+                        <span class="text-slate-400 text-sm utc-time" data-time="{{.CreatedAt}}">{{.CreatedAt}}</span>
                         {{if .ProcessingTime}}
-                        <span class="text-slate-500 text-xs ml-2 bg-slate-900 px-2 py-1 rounded border border-slate-700" title="AI Processing Time">⏱️ {{.ProcessingTime}}</span>
+                        <span class="text-slate-500 text-xs ml-2 bg-slate-900 px-2 py-1 rounded border border-slate-700"
+                            title="AI Processing Time">⏱️ {{.ProcessingTime}}</span>
                         {{end}}
                     </div>
                     <div class="flex gap-2">
@@ -245,7 +249,8 @@
                         <tr class="hover:bg-slate-800/50 transition-colors">
                             <td class="px-6 py-4 font-mono text-slate-500">#{{.ID}}</td>
                             <td class="px-6 py-4 font-medium text-indigo-400">{{.ProjectName}}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">{{.CreatedAt}}</td>
+                            <td class="px-6 py-4 whitespace-nowrap utc-time" data-time="{{.CreatedAt}}">{{.CreatedAt}}
+                            </td>
                             <td class="px-6 py-4 font-mono text-xs text-slate-500">{{.ProcessingTime}}</td>
                             <td class="px-6 py-4 text-slate-300">{{.Summary}}</td>
                             <td class="px-6 py-4 font-mono text-xs">{{.Tags}}</td>
@@ -260,6 +265,54 @@
     <footer class="max-w-5xl mx-auto px-6 py-8 text-center text-slate-600 text-sm">
         <p>&copy; 2025 Vexora Studio. Built with Go & Llama.</p>
     </footer>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay"
+        class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/90 backdrop-blur-sm transition-opacity duration-300 opacity-0">
+        <div class="flex flex-col items-center gap-4">
+            <div class="relative w-16 h-16">
+                <div class="absolute inset-0 border-4 border-indigo-500/30 rounded-full"></div>
+                <div class="absolute inset-0 border-4 border-indigo-500 rounded-full border-t-transparent animate-spin">
+                </div>
+            </div>
+            <p class="text-indigo-400 font-mono animate-pulse text-lg">Processing with AI...</p>
+            <p class="text-slate-500 text-sm">This might take a moment</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Time formatting
+            document.querySelectorAll('.utc-time').forEach(el => {
+                const utcTime = el.getAttribute('data-time');
+                if (utcTime) {
+                    const timeString = utcTime.endsWith('Z') ? utcTime : utcTime + 'Z';
+                    const date = new Date(timeString);
+                    el.textContent = date.toLocaleString(undefined, {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                }
+            });
+
+            // Loading Animation for Recurate/Fork
+            const forms = document.querySelectorAll('form[action*="/recurate"], form[action*="/fork"]');
+            const overlay = document.getElementById('loading-overlay');
+
+            forms.forEach(form => {
+                form.addEventListener('submit', () => {
+                    overlay.classList.remove('hidden');
+                    overlay.classList.add('flex');
+                    setTimeout(() => {
+                        overlay.classList.remove('opacity-0');
+                    }, 10);
+                });
+            });
+        });
+    </script>
 
 </body>
 

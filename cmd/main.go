@@ -40,6 +40,10 @@ func main() {
 	mux.HandleFunc("POST /recurate/{id}", api.HandleRecurate)
 	mux.HandleFunc("POST /fork/{id}", api.HandleFork)
 
+	// Miscellaneous Page
+	mux.HandleFunc("GET /misc", api.HandleMiscPage)
+	mux.HandleFunc("POST /misc", api.HandleMiscSubmit)
+
 	// 5. Start Server
 	port := ":8080"
 	log.Printf("📚 Vexora Studio (Journal Edition) listening on %s", port)
