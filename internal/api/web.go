@@ -9,33 +9,42 @@ import (
 )
 
 type PageData struct {
-	Entries        []database.JournalEntry
-	CurrentProject string
+	Feeds       []string
+	CurrentType string
 }
 
-func HandleWebIndex(w http.ResponseWriter, r *http.Request) {
-	entries, err := database.GetEntries()
+func HandleHome(w http.ResponseWriter, r *http.Request) {
+	feedType := r.URL.Query().Get("type")
+	if feedType == "" {
+		feedType = "instagram" // Default
+	}
+
+	var feeds []string
+	var err error
+
+	switch feedType {
+	case "twitter":
+		feeds, err = database.GetTodaysTwitterFeeds()
+	case "linkedin":
+		feeds, err = database.GetTodaysLinkedinFeeds()
+	case "newsletter":
+		feeds, err = database.GetTodaysNewsletterFeeds()
+	case "instagram":
+		fallthrough
+	default:
+		feeds, err = database.GetTodaysInstagramFeeds()
+		feedType = "instagram"
+	}
+
 	if err != nil {
 		log.Printf("❌ DB Error: %v", err)
 		http.Error(w, "Database Error", 500)
 		return
 	}
-	renderTemplate(w, PageData{Entries: entries})
-}
-
-func HandleWebProject(w http.ResponseWriter, r *http.Request) {
-	project := r.PathValue("project")
-	entries, err := database.GetEntriesByProject(project)
-	if err != nil {
-		log.Printf("❌ DB Error: %v", err)
-		http.Error(w, "Database Error", 500)
-		return
-	}
-	renderTemplate(w, PageData{Entries: entries, CurrentProject: project})
+	renderTemplate(w, PageData{Feeds: feeds, CurrentType: feedType})
 }
 
 func renderTemplate(w http.ResponseWriter, data PageData) {
-	log.Printf("Rendering template with %d entries. Project: %s", len(data.Entries), data.CurrentProject)
 	tmplPath := filepath.Join("templates", "index.html")
 	tmpl, err := template.ParseFiles(tmplPath)
 	if err != nil {
