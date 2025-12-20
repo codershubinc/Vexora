@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"vexora-studio/internal/database"
 	"vexora-studio/internal/llm"
@@ -23,12 +24,14 @@ func HandleCreateLinkedinFeed(w http.ResponseWriter, r *http.Request) {
 
 	data, err := llm.GenerateContent(llm.TypeLinkedIn, rawContent)
 	if err != nil {
+		log.Printf("❌ LinkedIn Generation Failed: %v", err)
 		http.Error(w, "Content Generation Failed", 500)
 		return
 	}
 
 	err = database.InsertLinkedinFeed(data, projectName)
 	if err != nil {
+		log.Printf("❌ LinkedIn DB Insert Failed: %v", err)
 		http.Error(w, "Database Insertion Failed", 500)
 		return
 	}

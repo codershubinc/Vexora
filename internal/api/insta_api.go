@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"vexora-studio/internal/database"
 	"vexora-studio/internal/llm"
@@ -29,12 +30,14 @@ func HandleCreateInstagramFeed(w http.ResponseWriter, r *http.Request) {
 
 	data, err := llm.GenerateContent(llm.TypeInstagram, rawContent)
 	if err != nil {
+		log.Printf("❌ Instagram Generation Failed: %v", err)
 		http.Error(w, "Content Generation Failed", 500)
 		return
 	}
 
 	err = database.InsertInstagramFeed(data, projectName)
 	if err != nil {
+		log.Printf("❌ Instagram DB Insert Failed: %v", err)
 		http.Error(w, "Database Insertion Failed", 500)
 		return
 	}

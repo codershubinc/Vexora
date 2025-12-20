@@ -36,7 +36,7 @@ func main() {
 	mux.HandleFunc("POST /newsletter", api.HandleCreateNewsletterFeed)
 
 	// 4. Start Server
-	port := ":8080"
+	port := ":8081"
 	log.Printf("📸 Vexora Studio listening on %s", port)
 
 	server := &http.Server{
