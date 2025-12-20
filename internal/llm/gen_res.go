@@ -62,7 +62,7 @@ func genNewsletter(notes string) (string, error) {
 }
 
 func fetchJSON(sysPrompt, userMsg string) (map[string]string, error) {
-	raw, err := callOllama(sysPrompt, userMsg, "json")
+	raw, err := callLLM(sysPrompt, userMsg, "json")
 	if err != nil {
 		return nil, err
 	}
@@ -75,9 +75,9 @@ func fetchJSON(sysPrompt, userMsg string) (map[string]string, error) {
 	return result, nil
 }
 
-// fetchText calls Ollama for raw text generation (Markdown, etc)
+// fetchText calls the selected LLM for raw text generation (Markdown, etc)
 func fetchText(sysPrompt, userMsg string) (string, error) {
-	return callOllama(sysPrompt, userMsg, "")
+	return callLLM(sysPrompt, userMsg, "")
 }
 
 func cleanJSON(input string) string {

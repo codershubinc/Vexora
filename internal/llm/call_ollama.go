@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 )
@@ -27,11 +28,13 @@ func callOllama(sysPrompt, userMsg, format string) (string, error) {
 	client := &http.Client{Timeout: 120 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
+		log.Printf("❌ Ollama Connection Error: %v", err)
 		return "", err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
+		log.Printf("❌ Ollama returned non-200 status: %s", resp.Status)
 		return "", fmt.Errorf("ollama status: %s", resp.Status)
 	}
 

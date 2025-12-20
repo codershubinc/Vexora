@@ -2,13 +2,26 @@ package llm
 
 import (
 	"fmt"
+	"log"
+	"os"
 )
 
 const (
 	// CONFIG: Local Llama (Ollama)
 	OllamaURL = "http://localhost:11434/v1/chat/completions"
 	Model     = "gemma3"
+
+	ProviderOllama = "ollama"
+	ProviderGemini = "gemini"
 )
+
+func getProvider() string {
+	p := os.Getenv("LLM_PROVIDER")
+	if p == "" {
+		return ProviderOllama
+	}
+	return p
+}
 
 type ollamaReq struct {
 	Model    string    `json:"model"`
@@ -51,4 +64,27 @@ func GenerateContent(feedType, userNotes string) (string, error) {
 	default:
 		return "", fmt.Errorf("unsupported feed type: %s", feedType)
 	}
+}
+
+func callLLM(sysPrompt, userMsg, format string) (string, error) {
+	provider := getProvider()
+	log.Printf("🤖 Using LLM Provider: %s", provider)
+
+	var res string
+	var err error
+
+	switch provider {
+	case ProviderGemini:
+		res, err = callGemini(sysPrompt, userMsg, format)
+	case ProviderOllama:
+		res, err = callOllama(sysPrompt, userMsg, format)
+	default:
+		log.Printf("⚠️ Unknown provider '%s', falling back to Ollama", provider)
+		res, err = callOllama(sysPrompt, userMsg, format)
+	}
+
+	if err != nil {
+		log.Printf("❌ LLM Error (%s): %v", provider, err)
+	}
+	return res, err
 }
