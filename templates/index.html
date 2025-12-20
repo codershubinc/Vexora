@@ -223,8 +223,8 @@
                 </div>
 
                 <!-- The Slide (Capture Target) -->
-                <div id="slide-{{$index}}"
-                    class="relative aspect-[4/5] overflow-hidden transition-all duration-500 group-hover:scale-[1.02] group-hover:shadow-2xl bg-slate-950 rounded-3xl border border-slate-800">
+                <div id="slide-{{$index}}" data-content-type="{{$.CurrentType}}"
+                    class="relative {{if eq $.CurrentType "newsletter"}}min-h-[800px] h-auto{{else}}aspect-[4/5] overflow-hidden{{end}} transition-all duration-500 group-hover:scale-[1.02] group-hover:shadow-2xl bg-slate-950 rounded-3xl border border-slate-800">
 
                     <!-- Dynamic Background Layers -->
                     <div
@@ -258,8 +258,8 @@
                         </div>
 
                         <!-- Main Text -->
-                        <div class="flex-1 overflow-hidden relative">
-                            <div class="absolute inset-0 overflow-y-auto scrollbar-hide">
+                        <div class="flex-1 {{if eq $.CurrentType "newsletter"}}{{else}}overflow-hidden relative{{end}}">
+                            <div class="{{if eq $.CurrentType "newsletter"}}{{else}}absolute inset-0 overflow-y-auto scrollbar-hide{{end}}">
                                 <!-- Render Target -->
                                 <div id="render-{{$index}}"
                                     class="content-text font-sans text-base leading-relaxed text-slate-200 transition-all duration-500 prose prose-invert max-w-none">
@@ -409,9 +409,14 @@
         function setTheme(slideId, styleName) {
             const slide = document.getElementById(slideId);
             const style = styles[styleName];
+            const isNewsletter = slide.getAttribute('data-content-type') === 'newsletter';
 
             // Reset base classes that might conflict
-            slide.className = `relative aspect-[4/5] overflow-hidden transition-all duration-500 group-hover:scale-[1.02] group-hover:shadow-2xl ${style.container}`;
+            const baseClasses = isNewsletter 
+                ? "min-h-[800px] h-auto" 
+                : "aspect-[4/5] overflow-hidden";
+
+            slide.className = `relative ${baseClasses} transition-all duration-500 group-hover:scale-[1.02] group-hover:shadow-2xl ${style.container}`;
 
             // Update Layers
             slide.querySelector('.layer-bg').className = `layer-bg absolute inset-0 transition-all duration-500 ${style.bgLayer}`;
