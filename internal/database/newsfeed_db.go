@@ -32,6 +32,16 @@ func GetNewsletterFeeds(projectName string) ([]string, error) {
 
 }
 
+func GetNewsletterByID(id string) (string, error) {
+	query := `SELECT feed FROM newsletters WHERE id = ?;`
+	var feed string
+	err := DB.QueryRow(query, id).Scan(&feed)
+	if err != nil {
+		return "", err
+	}
+	return feed, nil
+}
+
 func GetTodaysNewsletterFeeds() ([]string, error) {
 	query := `SELECT feed FROM newsletters WHERE DATE(created_at) = DATE('now');`
 	rows, err := DB.Query(query)

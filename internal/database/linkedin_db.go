@@ -31,6 +31,16 @@ func GetLinkedinFeedsByProject(projectName string) ([]string, error) {
 	return feeds, nil
 }
 
+func GetLinkedinFeedByID(id string) (string, error) {
+	query := `SELECT feed FROM linkedin_feeds WHERE id = ?;`
+	var feed string
+	err := DB.QueryRow(query, id).Scan(&feed)
+	if err != nil {
+		return "", err
+	}
+	return feed, nil
+}
+
 func GetTodaysLinkedinFeeds() ([]string, error) {
 	query := `SELECT feed FROM linkedin_feeds WHERE DATE(created_at) = DATE('now');`
 	rows, err := DB.Query(query)

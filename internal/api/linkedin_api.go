@@ -40,13 +40,34 @@ func HandleCreateLinkedinFeed(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(data))
 }
 
+func HandleGetTodaysLinkedinFeeds(w http.ResponseWriter, r *http.Request) {
+	feeds, err := database.GetTodaysLinkedinFeeds()
+	if err != nil {
+		log.Printf("❌ DB Error: %v", err)
+		http.Error(w, "Database Error", 500)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(feeds)
+}
+
 func HandleGetLinkedinFeeds(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", 405)
 		return
 	}
-	projectName := r.PathValue("project")
-	feeds, err := database.GetLinkedinFeedsByProject(projectName)
+	identifier := r.PathValue("identifier")
+
+	// Try to fetch by ID first
+	feed, err := database.GetLinkedinFeedByID(identifier)
+	if err == nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"feed": feed})
+		return
+	}
+
+	feeds, err := database.GetLinkedinFeedsByProject(identifier)
 	if err != nil {
 		http.Error(w, "Database Retrieval Failed", 500)
 		return

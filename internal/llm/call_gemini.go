@@ -53,7 +53,7 @@ func callGemini(sysPrompt, userMsg, format string) (string, error) {
 	}
 
 	model := os.Getenv("GEMINI_MODEL")
-	model = "gemini-3-flash-preview"
+	model = "gemini-2.5-flash-lite"
 	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", model, apiKey)
 
 	reqBody := geminiReq{

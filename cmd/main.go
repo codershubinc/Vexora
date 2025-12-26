@@ -26,14 +26,27 @@ func main() {
 	// 3. Setup Router
 	mux := http.NewServeMux()
 
-	// Web Interface
-	mux.HandleFunc("GET /", api.HandleHome)
+	// Static Frontend (for testing)
+	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "templates/index.html")
+	})
 
 	// API Endpoints
 	mux.HandleFunc("POST /instagram", api.HandleCreateInstagramFeed)
+	mux.HandleFunc("GET /instagram", api.HandleGetTodaysInstagramFeeds)
+	mux.HandleFunc("GET /instagram/{identifier}", api.HandleGetInstagramFeeds)
+
 	mux.HandleFunc("POST /twitter", api.HandleCreateTwitterFeed)
+	mux.HandleFunc("GET /twitter", api.HandleGetTodaysTwitterFeeds)
+	mux.HandleFunc("GET /twitter/{identifier}", api.HandleGetTwitterFeeds)
+
 	mux.HandleFunc("POST /linkedin", api.HandleCreateLinkedinFeed)
+	mux.HandleFunc("GET /linkedin", api.HandleGetTodaysLinkedinFeeds)
+	mux.HandleFunc("GET /linkedin/{identifier}", api.HandleGetLinkedinFeeds)
+
 	mux.HandleFunc("POST /newsletter", api.HandleCreateNewsletterFeed)
+	mux.HandleFunc("GET /newsletter", api.HandleGetTodaysNewsletterFeeds)
+	mux.HandleFunc("GET /newsletter/{identifier}", api.HandleGetNewsletterFeeds)
 
 	// 4. Start Server
 	port := ":8081"

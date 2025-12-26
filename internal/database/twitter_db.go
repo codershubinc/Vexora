@@ -31,6 +31,16 @@ func GetTwitterFeedsByProject(projectName string) ([]string, error) {
 	return feeds, nil
 }
 
+func GetTwitterFeedByID(id string) (string, error) {
+	query := `SELECT feed FROM twitter_feeds WHERE id = ?;`
+	var feed string
+	err := DB.QueryRow(query, id).Scan(&feed)
+	if err != nil {
+		return "", err
+	}
+	return feed, nil
+}
+
 func GetTodaysTwitterFeeds() ([]string, error) {
 	query := `SELECT feed FROM twitter_feeds WHERE DATE(created_at) = DATE('now');`
 	rows, err := DB.Query(query)
