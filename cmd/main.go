@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	smtp "vexora-studio/internal/SMTP"
 	"vexora-studio/internal/api"
 	"vexora-studio/internal/database"
 
@@ -60,7 +61,11 @@ func main() {
 		WriteTimeout: 300 * time.Second,
 	}
 
+	log.Println("Sending the mail")
+	smtp.Mail()
+
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
+
 }
