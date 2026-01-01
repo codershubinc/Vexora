@@ -20,41 +20,44 @@ func genInstagram(notes string) (string, error) {
 	return fetchText(PromptInstagram, notes)
 }
 
-// The Complex One: Newsletter (Two-Pass Strategy)
+type NewsletterMeta struct {
+	Subject string   `json:"subject_line"`
+	Preview string   `json:"preview_text"`
+	Tags    []string `json:"tags"` // Go can now handle the array
+}
+
 func genNewsletter(notes string) (string, error) {
-	result := make(map[string]string)
-
-	// Pass 1: Metadata (JSON)
-	metaPrompt := `
-    # Task
-    Generate metadata for a technical newsletter.
-    # JSON Output: {"subject": "Catchy Title", "preview": "Short hook", "tags": "#tag1"}
-    `
-	metaData, err := fetchJSON(metaPrompt, notes)
+	// --- Step A: Fetch Metadata (using specific struct) ---
+	// We can't use fetchJSON here because it returns map[string]string
+	// We invoke callOllama directly with "json" format
+	rawMeta, err := callOllama(PromptNewsMeta, notes, "json")
 	if err != nil {
 		return "", err
 	}
-	for k, v := range metaData {
-		result[k] = v
+
+	var meta NewsletterMeta
+	// Clean the JSON (remove potential markdown blocks) and Unmarshal
+	if err := json.Unmarshal([]byte(cleanJSON(rawMeta)), &meta); err != nil {
+		return "", fmt.Errorf("meta parse failed: %w", err)
 	}
 
-	// Pass 2: Body (Raw Text) - Reusing the "Senior Engineer" Prompt
-	bodyPrompt := `
-    # Role
-    Senior Principal Engineer.
-    # Task
-    Write a Masterclass-level newsletter deep dive.
-    - Include Code Snippets.
-    - Focus on architectural trade-offs.
-    - Output: Raw Markdown ONLY.
-    `
-	bodyText, err := fetchText(bodyPrompt, notes)
+	// --- Step B: Fetch Body (Raw Text) ---
+	bodyText, err := fetchText(PromptNewsBody, notes)
 	if err != nil {
 		return "", err
 	}
-	result["body"] = bodyText
 
-	jsonBytes, err := json.Marshal(result)
+	// --- Step C: Combine into Final JSON ---
+	// We convert the Tags array to a string for the final output if needed,
+	// or keep it as an array if your frontend supports it.
+	finalOutput := map[string]interface{}{
+		"subject_line": meta.Subject,
+		"preview_text": meta.Preview,
+		"tags":         meta.Tags, // This stays an array now!
+		"body":         bodyText,
+	}
+
+	jsonBytes, err := json.Marshal(finalOutput)
 	if err != nil {
 		return "", err
 	}

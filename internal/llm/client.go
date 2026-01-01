@@ -18,9 +18,9 @@ const (
 func getProvider() string {
 	p := os.Getenv("LLM_PROVIDER")
 	if p == "" {
-		return ProviderOllama
+		return "gemini"
 	}
-	return p
+	return "gemini"
 }
 
 type ollamaReq struct {

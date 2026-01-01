@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	smtp "vexora-studio/internal/SMTP"
 	"vexora-studio/internal/api"
+	"vexora-studio/internal/dashboard"
 	"vexora-studio/internal/database"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -52,6 +52,8 @@ func main() {
 	// 4. Start Server
 	port := ":8081"
 	log.Printf("📸 Vexora Studio listening on %s", port)
+	log.Println("🖥️  Dashboard available at http://localhost:8081/dashboard")
+	dashboard.StartDashboard(":8082")
 
 	server := &http.Server{
 		Addr:    port,
@@ -62,7 +64,7 @@ func main() {
 	}
 
 	log.Println("Sending the mail")
-	smtp.Mail()
+	// smtp.Mail()
 
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
